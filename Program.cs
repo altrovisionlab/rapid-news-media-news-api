@@ -1,5 +1,10 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using rapid_news_media_news_api.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddDbContext<NewsDBContext>(opt => opt.UseInMemoryDatabase("NewsDB"));
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -14,6 +19,14 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+
+//Initialize Seed for In Memory Database 
+var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+using (var scope = scopeFactory.CreateScope())
+{
+    var dbcontext = scope.ServiceProvider.GetRequiredService<NewsDBContext>();
+    dbcontext.Database.EnsureCreated();
 }
 
 app.UseHttpsRedirection();
