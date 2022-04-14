@@ -14,17 +14,28 @@ namespace rapid_news_media_news_api.Controllers
     [ApiController]
     public class NewsController : ControllerBase
     {
-        private readonly NewsDBContext _context;
+        private readonly NewsDbContext _context;
 
-        public NewsController(NewsDBContext context)
+        public NewsController(NewsDbContext context)
         {
             _context = context;
         }
 
         // GET: api/News
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<NewsReport>>> GetNewsReport()
+        public async Task<ActionResult<IEnumerable<NewsReport>>> GetNewsReport([FromQuery] string category, [FromQuery] string username)
         {
+            if (username == null && category != null)
+            {
+                return await _context.NewsReports.Where(news => news.Category == category && news.Status != "deleted").ToListAsync();
+            }
+            else if (username != null && category == null)
+            {
+                return await _context.NewsReports.Where(news => news.CreatedByUsername == username).ToListAsync();
+            } else if(username != null && category != null)
+            {
+                return await _context.NewsReports.Where(news => news.CreatedByUsername == username && news.Category == category).ToListAsync();
+            }
             return await _context.NewsReports.ToListAsync();
         }
 
@@ -78,6 +89,7 @@ namespace rapid_news_media_news_api.Controllers
         [HttpPost]
         public async Task<ActionResult<NewsReport>> PostNewsReport(NewsReport newsReport)
         {
+            newsReport.Status = "published";
             _context.NewsReports.Add(newsReport);
             await _context.SaveChangesAsync();
 
@@ -94,8 +106,11 @@ namespace rapid_news_media_news_api.Controllers
                 return NotFound();
             }
 
-            _context.NewsReports.Remove(newsReport);
-            await _context.SaveChangesAsync();
+            //_context.NewsReports.Remove(newsReport);
+            //Soft delete by setting the status to deleted
+            newsReport.Status = "deleted";
+             
+            await PutNewsReport(newsReport.Id, newsReport);
 
             return NoContent();
         }

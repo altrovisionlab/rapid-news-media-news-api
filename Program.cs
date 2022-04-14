@@ -1,12 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using rapid_news_media_news_api.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<NewsDBContext>(opt => opt.UseInMemoryDatabase("NewsDB"));
+builder.Services.AddDbContext<NewsDbContext>(opt => opt.UseInMemoryDatabase("NewsDb"));
 // Add services to the container.
-
+builder.Services.AddCors();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -25,11 +24,17 @@ if (app.Environment.IsDevelopment())
 var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
 using (var scope = scopeFactory.CreateScope())
 {
-    var dbcontext = scope.ServiceProvider.GetRequiredService<NewsDBContext>();
+    var dbcontext = scope.ServiceProvider.GetRequiredService<NewsDbContext>();
     dbcontext.Database.EnsureCreated();
 }
 
 app.UseHttpsRedirection();
+
+// global cors policy
+app.UseCors(x => x
+    .AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader());
 
 app.UseAuthorization();
 
