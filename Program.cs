@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using rapid_news_media_news_api.Models;
+using rapid_news_media_news_api.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,9 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Add services to the container.
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
@@ -35,6 +39,9 @@ app.UseCors(x => x
     .AllowAnyOrigin()
     .AllowAnyMethod()
     .AllowAnyHeader());
+
+// custom auth middleware
+app.UseMiddleware<AuthMiddleware>();
 
 app.UseAuthorization();
 

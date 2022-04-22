@@ -1,15 +1,14 @@
 #nullable disable
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using rapid_news_media_news_api.Models;
+using rapid_news_media_news_api.Authorization;
+
+
 
 namespace rapid_news_media_news_api.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class NewsController : ControllerBase
@@ -22,6 +21,7 @@ namespace rapid_news_media_news_api.Controllers
         }
 
         // GET: api/News
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<NewsReport>>> GetNewsReport([FromQuery] string category, [FromQuery] string username)
         {
@@ -40,6 +40,7 @@ namespace rapid_news_media_news_api.Controllers
         }
 
         // GET: api/News/5
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<ActionResult<NewsReport>> GetNewsReport(long id)
         {
